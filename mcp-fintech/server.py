@@ -107,6 +107,25 @@ mcp = FastMCP(
     port=int(os.getenv("PORT", "8000")),
 )
 
+# ── Workaround: no anunciar capabilities prompts/resources (fix mcp-remote race) ─
+# FastMCP 1.9.4 registra handlers para `prompts/list` y `resources/list` por
+# default aunque no haya nada registrado. mcp-remote ve esas capabilities en el
+# init response y dispara las 3 list-requests (tools/prompts/resources) en paralelo
+# sobre la misma conexión HTTP/1.1 keepalive. FastMCP tiene un race condition
+# bajo ese pipelining y falla `prompts/list` y `resources/list` con -32602
+# "Invalid request parameters". mcp-remote crashea procesando esas error responses
+# y termina rompiendo el `tools/list` también → Claude Desktop ve "no tools".
+#
+# Removiendo los handlers de las primitivas que NO usamos, FastMCP no las anuncia
+# como capabilities y mcp-remote ni siquiera las pide. Solo `tools/list` se envía
+# sobre la conexión, sin race, todo funciona. Ver issue #34.
+from mcp import types as _mcp_types  # noqa: E402
+
+_request_handlers = mcp._mcp_server.request_handlers
+_request_handlers.pop(_mcp_types.ListPromptsRequest, None)
+_request_handlers.pop(_mcp_types.ListResourcesRequest, None)
+_request_handlers.pop(_mcp_types.ListResourceTemplatesRequest, None)
+
 
 # ── Healthcheck — usado por docker-compose ───────────────────────────────────
 @mcp.custom_route("/health", methods=["GET"], include_in_schema=False)
