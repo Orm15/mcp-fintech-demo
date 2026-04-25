@@ -228,10 +228,6 @@ Tema visual: paleta Tailwind slate/indigo, profesional, mobile-friendly.
 
 ![Dashboard ejecutivo](screenshots/04-dashboard-cliente.png)
 
-### Observaciones
-
-_(¿cuántas tools llamó? ¿hubo graceful degradation con consultar_limites?)_
-
 ---
 
 ## 04b — Cuentas HTML server-rendered (contraste server vs LLM)
@@ -256,10 +252,6 @@ Llamá la tool fintech_consultar_cuentas_html con cliente_id="cliente-001". Most
 ### Evidencia
 
 ![Cuentas server-rendered](screenshots/04b-cuentas-html.png)
-
-### Observaciones
-
-_(¿cuál de los dos enfoques te parece más útil para este caso de uso?)_
 
 ---
 
@@ -299,10 +291,6 @@ ratio gasto/saldo (menor es mejor) y diversificación de cuentas. Justificá el 
 
 ![Comparativa clientes](screenshots/05-comparar-clientes.png)
 
-### Observaciones
-
-_(¿el veredicto fue razonable según los números?)_
-
 ---
 
 ## 06 — Bloqueo 403 en auditoría (security boundary)
@@ -324,10 +312,6 @@ Llamá fintech_ver_auditoria con limite=20 y mostrame qué devuelve. Si falla, e
 ### Evidencia
 
 ![Bloqueo 403](screenshots/06-bloqueo-403.png)
-
-### Observaciones
-
-_(¿Claude explicó claramente el motivo del 403? ¿sugirió cómo resolverlo?)_
 
 ---
 
@@ -377,9 +361,6 @@ Paleta slate/indigo, profesional.
 
 ![Post-mortem auditoría](screenshots/07-postmortem-admin.png)
 
-### Observaciones
-
-_(¿el LLM detectó patrones reales o solo estadísticas básicas?)_
 
 ---
 
@@ -404,9 +385,6 @@ Llamá fintech_ver_auditoria_html con limite=30. Mostrame el HTML que devuelve E
 
 ![Audit log HTML](screenshots/07b-auditoria-html.png)
 
-### Observaciones
-
-_(¿el reasoning de "cuándo usar cada uno" identificó tradeoffs correctos?)_
 
 ---
 
@@ -448,9 +426,6 @@ bloqueos o latencias inusuales.
 
 ![Replay sequence diagram](screenshots/08-replay-mermaid.png)
 
-### Observaciones
-
-_(¿el diagrama queda legible con 8 llamadas? ¿reflejó bien los bloqueos?)_
 
 ---
 
@@ -483,10 +458,6 @@ y un ranking de "salud financiera" con justificación.
 ### Evidencia
 
 ![Análisis libre](screenshots/09-analisis-libre.png)
-
-### Observaciones
-
-_(¿cuántas tools llamó en total? ¿hubo errores parciales? ¿el ranking tuvo sentido?)_
 
 ---
 
