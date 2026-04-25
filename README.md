@@ -2,7 +2,7 @@
 
 Simulación de arquitectura MCP bancaria con autenticación por roles, rate limiting y auditoría persistida en PostgreSQL.
 
-Backend implementado con **Clean Architecture + Hexagonal (Ports & Adapters)** sobre FastAPI, exponiendo **16 tools** (13 de negocio + 3 variantes HTML server-rendered para contraste con Artifacts del LLM) y **6 prompts** MCP a través de FastMCP con transporte `streamable-http`. Los prompts orquestan tool calls + render visual (Artifacts React, diagramas Mermaid).
+Backend implementado con **Clean Architecture + Hexagonal (Ports & Adapters)** sobre FastAPI, exponiendo **16 tools** (13 de negocio + 3 variantes HTML server-rendered para contraste con Artifacts del LLM) a través de FastMCP con transporte `streamable-http`.
 
 ## Diagrama de flujo
 
@@ -79,7 +79,7 @@ graph TB
 |-------------|--------|-----|
 | postgres    | 5432   | Auth, auditoría, rate limiting + datos bancarios |
 | api-fintech | 9000   | Endpoints bancarios (FastAPI + Clean Architecture) |
-| mcp-fintech | 8000   | 16 MCP tools + 6 prompts (FastMCP `streamable-http`) |
+| mcp-fintech | 8000   | 16 MCP tools (FastMCP `streamable-http`) |
 
 ## Arquitectura `api-fintech`
 
@@ -149,28 +149,22 @@ Rate limit: 100 llamadas/hora por consumer.
 | `fintech_ver_auditoria`            | `cuentas:write` (admin) | JSON |
 | `fintech_ver_auditoria_html`       | `cuentas:write` (admin) | **HTML server-rendered** |
 
-## 6 MCP prompts (plantillas pre-armadas con artifacts)
-
-Los prompts aparecen en Claude Desktop como un menú (icono `+` o slash). Inyectan instrucciones que orquestan tool calls + indican a Claude cómo renderizar el output (artifact React, diagrama Mermaid).
-
-| Prompt | Argumentos | Render |
-|--------|-----------|--------|
-| `resumen_cliente`        | `cliente_id` | Artifact React (dashboard ejecutivo) |
-| `flujo_transferencias`   | `cuenta_id`  | Diagrama Mermaid `graph LR` |
-| `alerta_presupuesto`     | `cliente_id` | Artifact React (BarChart Recharts) |
-| `comparar_clientes`      | `cliente_a`, `cliente_b` | Artifact React side-by-side + veredicto |
-| `auditoria_postmortem`   | `limite` *(default 30)* | Artifact React (admin only) |
-| `replay_auditoria`       | `limite` *(default 8)* | Sequence diagram Mermaid (admin only) |
-
 ### Comparación: dos enfoques de render
 
 El demo expone **3 pares** de tool JSON / variante HTML para que veas el mismo dato resuelto con dos tecnologías de presentación distintas:
 
-| Caso de uso | Tool JSON (input para LLM) | Tool HTML (server-rendered) | Prompt MCP equivalente |
-|-------------|---------------------------|-----------------------------|------------------------|
-| Resumen de gastos | `fintech_resumen_gastos` | `fintech_resumen_gastos_html` | `alerta_presupuesto` |
-| Cuentas de un cliente | `fintech_consultar_cuentas` | `fintech_consultar_cuentas_html` | `resumen_cliente` |
-| Auditoría (admin) | `fintech_ver_auditoria` | `fintech_ver_auditoria_html` | `auditoria_postmortem` |
+| Caso de uso | Tool JSON (input para LLM) | Tool HTML (server-rendered) |
+|-------------|---------------------------|-----------------------------|
+| Resumen de gastos | `fintech_resumen_gastos` | `fintech_resumen_gastos_html` |
+| Cuentas de un cliente | `fintech_consultar_cuentas` | `fintech_consultar_cuentas_html` |
+| Auditoría (admin) | `fintech_ver_auditoria` | `fintech_ver_auditoria_html` |
+
+> **Nota:** una versión anterior del server registraba 6 `@mcp.prompt()` decorators
+> (plantillas pre-armadas como `resumen_cliente`, `auditoria_postmortem`, etc.) que
+> orquestaban tool calls + render visual. Se removieron en [#30](https://github.com/Orm15/mcp-fintech-demo/issues/30)
+> porque (a) no aparecen en la UI de Claude Desktop actual y (b) gatillaban un bug
+> de pipelining en `mcp-remote 0.1.38`. Los textos equivalentes quedaron inline en
+> [`docs/pruebas/`](docs/pruebas/) para que el usuario los pegue como prompts directos.
 
 | Approach | Renderiza | Ventaja | Cuándo elegirlo |
 |----------|-----------|---------|-----------------|
@@ -243,7 +237,7 @@ open -a "Claude"
 
 ### 4. Verificar que cargó
 
-En una conversación nueva, hacé click en el icono **🔨** (o "Search and tools") debajo del input. Deberías ver **"fintech"** con 16 tools (los 6 prompts pueden no aparecer en la UI según la versión — eso no impide su uso, ver `docs/pruebas/`).
+En una conversación nueva, hacé click en el icono **🔨** (o "Search and tools") debajo del input. Deberías ver **"fintech"** con 16 tools.
 
 Si no aparece, revisá los logs:
 
