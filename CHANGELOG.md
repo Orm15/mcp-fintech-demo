@@ -6,8 +6,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Removed
+- **6 MCP prompts** (`@mcp.prompt`) — gatillaban un bug de pipelining en `mcp-remote 0.1.38` y la versión actual de Claude Desktop no los surface en la UI. Sus textos quedaron inline en `docs/pruebas/` para que se peguen como prompts directos. Ver [#30](https://github.com/Orm15/mcp-fintech-demo/issues/30).
+
 ### Added
-- **6 MCP prompts** (`@mcp.prompt`): `resumen_cliente`, `flujo_transferencias`, `alerta_presupuesto`, `comparar_clientes`, `auditoria_postmortem`, `replay_auditoria`. Orquestan tool calls + render visual via Artifacts React / Mermaid.
 - 3 tools HTML server-rendered para contraste server-side vs LLM Artifacts:
   - `fintech_resumen_gastos_html` (resumen de gastos como tabla con barra de distribución).
   - `fintech_consultar_cuentas_html` (cuentas como tarjetas estilo "bank card").

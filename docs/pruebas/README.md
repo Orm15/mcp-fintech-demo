@@ -50,16 +50,17 @@ make audit-log      # tabla con últimas auditorías (sanity)
 | 08 | Replay auditoría sequence (admin) | admin | `08-replay-mermaid.png` |
 | 09 | Análisis libre encadenando todo (admin) | admin | `09-analisis-libre.png` |
 
-> **Nota sobre los prompts MCP:** los tests usan los prompts MCP (`resumen_cliente`,
-> `alerta_presupuesto`, etc.) como blueprint de lo que se quiere lograr, pero el texto
-> que pegás abajo de cada test es la versión renderizada (instrucciones inline). Esto
-> hace los tests reproducibles independientemente de la versión de Claude Desktop.
+> **Nota:** una versión anterior del server registraba 6 `@mcp.prompt()` decorators
+> que servían como blueprint de estos tests. Se removieron en
+> [#30](https://github.com/Orm15/mcp-fintech-demo/issues/30) por bug de pipelining en
+> `mcp-remote`. Los textos quedaron inline en cada test — pegalos directo y obtenés
+> el mismo resultado.
 
 ---
 
 ## 01 — Listar tools y prompts disponibles
 
-> **Rol:** user · **Verifica:** que Claude Desktop reconozca los 14 tools + 6 prompts.
+> **Rol:** user · **Verifica:** que Claude Desktop reconozca las 16 tools del server.
 
 ### Prompt
 
@@ -72,7 +73,7 @@ Agrupalos por categoría y decime cuántos son en total.
 
 - El server MCP exporta correctamente las capabilities (`tools/list` + `prompts/list`).
 - Claude las refleja en el menú de herramientas (icono 🔨 / Search and tools).
-- El total esperado: **14 tools + 6 prompts**.
+- El total esperado: **16 tools** (sin prompts — ver issue #30 sobre la remoción).
 
 ### Evidencia
 
@@ -192,7 +193,6 @@ Quiero comparar dos enfoques de render. Hacé esto en orden:
 ## 04 — Dashboard ejecutivo (artifact React multi-tool)
 
 > **Rol:** user · **Verifica:** orquestación de 4 tools + artifact React complejo.
-> Equivalente al prompt MCP `resumen_cliente`.
 
 ### Prompt
 
@@ -266,7 +266,6 @@ _(¿cuál de los dos enfoques te parece más útil para este caso de uso?)_
 ## 05 — Comparativa entre clientes
 
 > **Rol:** user · **Verifica:** orquestación con 2 entidades + side-by-side + veredicto.
-> Equivalente al prompt MCP `comparar_clientes`.
 
 ### Prompt
 
@@ -335,7 +334,6 @@ _(¿Claude explicó claramente el motivo del 403? ¿sugirió cómo resolverlo?)_
 ## 07 — Auditoría post-mortem (artifact React)
 
 > **Rol:** admin · **Verifica:** lectura del audit log + render visual ejecutivo.
-> Equivalente al prompt MCP `auditoria_postmortem`.
 
 > ⚠️ Antes de los tests admin: cambiá la key en el JSON de Claude Desktop a
 > `adm-fintech-x9p2m7k1`, hacé `Cmd+Q` completo y reabrí Claude.
@@ -415,7 +413,6 @@ _(¿el reasoning de "cuándo usar cada uno" identificó tradeoffs correctos?)_
 ## 08 — Replay del audit trail (sequence diagram)
 
 > **Rol:** admin · **Verifica:** visualización del flujo end-to-end por cada llamada.
-> Equivalente al prompt MCP `replay_auditoria`.
 
 ### Prompt
 
