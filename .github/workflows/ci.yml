@@ -119,14 +119,14 @@ jobs:
           docker build -t mcp-fintech:scan -f mcp-fintech/Dockerfile .
 
       - name: Trivy api-fintech
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: api-fintech:scan
           severity: HIGH,CRITICAL
           exit-code: "0"   # informativo, no bloquea
 
       - name: Trivy mcp-fintech
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: mcp-fintech:scan
           severity: HIGH,CRITICAL
