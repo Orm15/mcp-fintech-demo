@@ -1,40 +1,67 @@
 version: 2
 updates:
+  # ── Python deps por servicio ────────────────────────────────────────────────
   - package-ecosystem: pip
     directory: /api-fintech
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 2
     labels: ["deps", "api-fintech"]
+    versioning-strategy: increase-if-necessary
+    groups:
+      api-fintech-deps:
+        patterns: ["*"]
 
   - package-ecosystem: pip
     directory: /mcp-fintech
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 2
     labels: ["deps", "mcp-fintech"]
+    versioning-strategy: increase-if-necessary
+    groups:
+      mcp-fintech-deps:
+        patterns: ["*"]
 
   - package-ecosystem: pip
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 3
+      interval: monthly
+    open-pull-requests-limit: 2
     labels: ["deps", "dev"]
+    versioning-strategy: increase-if-necessary
+    groups:
+      dev-deps:
+        patterns: ["*"]
 
+  # ── Imágenes base de Docker ─────────────────────────────────────────────────
   - package-ecosystem: docker
     directory: /api-fintech
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
     labels: ["deps", "docker"]
+    groups:
+      docker-base:
+        patterns: ["*"]
 
   - package-ecosystem: docker
     directory: /mcp-fintech
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
     labels: ["deps", "docker"]
+    groups:
+      docker-base:
+        patterns: ["*"]
 
+  # ── GitHub Actions ──────────────────────────────────────────────────────────
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    open-pull-requests-limit: 1
     labels: ["deps", "ci"]
+    groups:
+      gh-actions:
+        patterns: ["*"]
