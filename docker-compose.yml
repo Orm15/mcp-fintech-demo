@@ -1,0 +1,81 @@
+networks:
+  fintech-net:
+    driver: bridge
+
+volumes:
+  postgres-data:
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fintech-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fintechdb
+      POSTGRES_USER: fintech
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - fintech-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fintech -d fintechdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api-fintech:
+    build:
+      context: ./api-fintech
+      dockerfile: Dockerfile
+    container_name: api-fintech
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      - FUNCTION_KEY=${FUNCTION_KEY}
+      - DATABASE_URL=postgresql://fintech:${POSTGRES_PASSWORD}@postgres:5432/fintechdb
+    networks:
+      - fintech-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:9000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  mcp-fintech:
+    build:
+      context: .
+      dockerfile: mcp-fintech/Dockerfile
+    container_name: mcp-fintech
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - FUNCTION_BASE_URL=http://api-fintech:9000
+      - FUNCTION_KEY=${FUNCTION_KEY}
+      - DATABASE_URL=postgresql://fintech:${POSTGRES_PASSWORD}@postgres:5432/fintechdb
+      - PORT=8000
+    networks:
+      - fintech-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api-fintech:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request,sys; r=urllib.request.urlopen('http://localhost:8000/health',timeout=3); sys.exit(0 if r.status==200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
