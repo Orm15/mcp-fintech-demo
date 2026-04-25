@@ -1,0 +1,85 @@
+[project]
+name = "mcp-fintech-demo"
+version = "0.1.0"
+description = "Fintech MCP simulation — 3 containers, role-based auth, audit log"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--tb=short",
+]
+markers = [
+    "unit: fast tests with no external dependencies",
+    "integration: tests requiring docker (postgres testcontainer)",
+    "security: black-box tests against the running stack",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:asyncio",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["api-fintech", "mcp-fintech"]
+omit = [
+    "*/tests/*",
+    "*/__init__.py",
+    "*/main.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "\\.\\.\\.",
+]
+show_missing = true
+skip_covered = false
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["postgres", ".venv"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+    "S",    # flake8-bandit (security)
+    "SIM",  # flake8-simplify
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "S101",   # use of assert (fine in tests)
+    "S104",   # binding to all interfaces (intentional in container)
+    "B008",   # function call in default argument (FastAPI Depends pattern)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_return_any = false
+no_implicit_optional = true
+check_untyped_defs = true
+ignore_missing_imports = true
+exclude = ["tests/", ".venv/"]
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]
+skips = ["B101"]  # assert_used — fine in tests
