@@ -1,0 +1,20 @@
+.env
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+
+# Python tooling
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+coverage.xml
+.coverage
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+!.vscode/extensions.json
