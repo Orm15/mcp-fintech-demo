@@ -1,0 +1,40 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /api-fintech
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels: ["deps", "api-fintech"]
+
+  - package-ecosystem: pip
+    directory: /mcp-fintech
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels: ["deps", "mcp-fintech"]
+
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    labels: ["deps", "dev"]
+
+  - package-ecosystem: docker
+    directory: /api-fintech
+    schedule:
+      interval: monthly
+    labels: ["deps", "docker"]
+
+  - package-ecosystem: docker
+    directory: /mcp-fintech
+    schedule:
+      interval: monthly
+    labels: ["deps", "docker"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels: ["deps", "ci"]

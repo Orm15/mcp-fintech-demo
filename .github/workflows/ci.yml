@@ -1,0 +1,178 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  PY_VERSION: "3.12"
+
+jobs:
+  lint:
+    name: Lint + typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PY_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - run: pip install -r requirements-dev.txt psycopg2-binary==2.9.9
+
+      - name: ruff check
+        run: ruff check .
+
+      - name: ruff format --check
+        run: ruff format --check .
+
+      - name: mypy
+        run: mypy api-fintech mcp-fintech || true   # informativo, no bloquea
+        continue-on-error: true
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PY_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - run: pip install -r requirements-dev.txt psycopg2-binary==2.9.9
+
+      - name: pytest unit
+        run: pytest tests/ -m unit --cov --cov-report=xml --cov-report=term
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-unit
+          path: coverage.xml
+
+  integration-tests:
+    name: Integration tests (testcontainers)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PY_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - run: pip install -r requirements-dev.txt psycopg2-binary==2.9.9 -r api-fintech/requirements.txt
+
+      - name: pytest integration
+        run: pytest tests/ -m integration -v
+
+  security-scans:
+    name: Security scans
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # gitleaks needs history
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PY_VERSION }}
+
+      - run: pip install bandit==1.7.10 pip-audit==2.7.3
+
+      - name: bandit (static analysis)
+        run: bandit -r api-fintech mcp-fintech -ll
+        continue-on-error: true
+
+      - name: pip-audit (CVEs in deps)
+        run: |
+          pip-audit -r api-fintech/requirements.txt || true
+          pip-audit -r mcp-fintech/requirements.txt || true
+        continue-on-error: true
+
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+  trivy-scan:
+    name: Trivy image scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build images
+        run: |
+          docker build -t api-fintech:scan -f api-fintech/Dockerfile api-fintech
+          docker build -t mcp-fintech:scan -f mcp-fintech/Dockerfile .
+
+      - name: Trivy api-fintech
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: api-fintech:scan
+          severity: HIGH,CRITICAL
+          exit-code: "0"   # informativo, no bloquea
+
+      - name: Trivy mcp-fintech
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: mcp-fintech:scan
+          severity: HIGH,CRITICAL
+          exit-code: "0"
+
+  e2e-security:
+    name: E2E security tests (compose stack)
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PY_VERSION }}
+
+      - run: pip install -r requirements-dev.txt
+
+      - name: Levantar stack
+        run: |
+          cp .env.example .env
+          docker compose up -d --build --wait
+
+      - name: Esperar mcp-fintech
+        run: |
+          for i in {1..30}; do
+            if curl -sf -X POST http://localhost:8000/mcp/ \
+                 -H "Content-Type: application/json" \
+                 -H "Accept: application/json, text/event-stream" \
+                 -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci","version":"1"}}}' > /dev/null; then
+              echo "MCP up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MCP no levantó"
+          docker compose logs
+          exit 1
+
+      - name: pytest security
+        run: pytest tests/security/ -m security -v
+
+      - name: Logs en caso de fallo
+        if: failure()
+        run: docker compose logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
