@@ -87,6 +87,9 @@ audit:  ## bandit + pip-audit
 psql:  ## Abrir psql interactivo en el contenedor
 	docker exec -it fintech-postgres psql -U fintech -d fintechdb
 
+patch-mcp-remote:  ## Aplicar workaround a mcp-remote (ver issue #36)
+	./scripts/patch-mcp-remote.sh
+
 audit-log:  ## Mostrar los ultimos 20 registros de auditoria
 	@docker exec fintech-postgres psql -U fintech -d fintechdb -c "\
 SELECT ac.nombre, al.tool_nombre, al.status_code, al.latencia_ms, al.llamado_en::text \
