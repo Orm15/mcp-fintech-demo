@@ -26,7 +26,7 @@ testcontainers[postgresql]==4.8.2
 ruff==0.7.4
 mypy==1.13.0
 bandit==1.7.10
-pip-audit==2.7.3
+pip-audit==2.10.0
 pre-commit==4.0.1
 
 # Optional: install if you have Python 3.12 for postgres adapter tests
