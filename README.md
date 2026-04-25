@@ -225,7 +225,7 @@ Si tu archivo está vacío, dejá solo el bloque `"mcpServers"` envuelto en un o
 
 Guardá con `Cmd+S`.
 
-### 3. Reiniciar Claude Desktop completo
+### 3. Reiniciar Claude Desktop una vez
 
 ```bash
 osascript -e 'quit app "Claude"'
@@ -233,9 +233,33 @@ sleep 2
 open -a "Claude"
 ```
 
-> Cerrar la ventana NO basta — Claude Desktop solo relee el config con un quit completo (`Cmd+Q`).
+Esto hace que Claude Desktop spawnée `mcp-remote` por primera vez y lo cachée vía `npx` en `~/.npm/_npx/`. Cerrar la ventana NO basta — Claude Desktop solo relee el config con un quit completo (`Cmd+Q`).
 
-### 4. Verificar que cargó
+### 4. Aplicar el workaround para mcp-remote
+
+> ⚠️ **Necesario una vez** después del primer arranque.
+
+`mcp-remote` 0.1.36/0.1.37/0.1.38 tiene un bug que crashea procesando ciertas respuestas JSON-RPC del server (ver [issue #36](https://github.com/Orm15/mcp-fintech-demo/issues/36)). Síntoma: Claude Desktop dice "no tools available" aunque el server esté sano.
+
+El demo incluye un patch idempotente para arreglarlo:
+
+```bash
+make patch-mcp-remote
+```
+
+Después, reiniciá Claude Desktop una segunda vez:
+
+```bash
+osascript -e 'quit app "Claude"' && sleep 2 && open -a "Claude"
+```
+
+> El patch vive en tu cache local (`~/.npm/_npx/`), no en el repo. Solo hay que re-correr `make patch-mcp-remote` si:
+> - Borrás el cache (`rm -rf ~/.npm/_npx`)
+> - Cambiás la versión de mcp-remote en el JSON
+> 
+> Para uso normal del demo no hace falta tocarlo.
+
+### 5. Verificar que cargó
 
 En una conversación nueva, hacé click en el icono **🔨** (o "Search and tools") debajo del input. Deberías ver **"fintech"** con 16 tools.
 
@@ -245,7 +269,7 @@ Si no aparece, revisá los logs:
 tail -50 ~/Library/Logs/Claude/mcp-server-fintech.log
 ```
 
-### 5. Cambiar de user a admin
+### 6. Cambiar de user a admin
 
 Editá el JSON cambiando solo el valor del header:
 

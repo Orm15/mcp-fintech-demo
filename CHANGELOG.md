@@ -6,6 +6,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- `scripts/patch-mcp-remote.sh` + `make patch-mcp-remote` — workaround para el bug de `mcp-remote` 0.1.36/0.1.37/0.1.38 que crashea procesando respuestas JSON-RPC en `tools/list` cuando `res.result` es undefined (típico de respuestas de error). Ver [#36](https://github.com/Orm15/mcp-fintech-demo/issues/36).
+
 ### Removed
 - **6 MCP prompts** (`@mcp.prompt`) — gatillaban un bug de pipelining en `mcp-remote 0.1.38` y la versión actual de Claude Desktop no los surface en la UI. Sus textos quedaron inline en `docs/pruebas/` para que se peguen como prompts directos. Ver [#30](https://github.com/Orm15/mcp-fintech-demo/issues/30).
 
