@@ -24,7 +24,7 @@ testcontainers[postgresql]==4.8.2
 
 # Lint, typecheck, security
 ruff==0.7.4
-mypy==1.13.0
+mypy==1.20.2
 bandit==1.7.10
 pip-audit==2.7.3
 pre-commit==4.0.1
