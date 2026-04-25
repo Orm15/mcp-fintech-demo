@@ -1,0 +1,11 @@
+# CODEOWNERS — quién debe revisar qué.
+# Sintaxis: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default: repo owner revisa todo lo que no matchee abajo.
+*               @victor
+
+# Cambios sensibles requieren revisión adicional.
+postgres/       @victor
+.github/        @victor
+SECURITY.md     @victor
+docs/adr/       @victor
