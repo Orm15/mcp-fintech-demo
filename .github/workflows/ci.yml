@@ -118,15 +118,18 @@ jobs:
           docker build -t api-fintech:scan -f api-fintech/Dockerfile api-fintech
           docker build -t mcp-fintech:scan -f mcp-fintech/Dockerfile .
 
+      # NOTE: usamos `@master` porque trivy-action no publica tags estables
+      # con la frecuencia que sí mantiene la rama. Para ambientes productivos
+      # pinear a un SHA verificado y bumpear vía Dependabot.
       - name: Trivy api-fintech
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: api-fintech:scan
           severity: HIGH,CRITICAL
           exit-code: "0"   # informativo, no bloquea
 
       - name: Trivy mcp-fintech
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: mcp-fintech:scan
           severity: HIGH,CRITICAL

@@ -331,11 +331,11 @@ def _render_consultar_cuentas_html(data: dict) -> str:
                 f'<div class="card-head">'
                 f'<span class="cuenta-id">{cuenta_id}</span>'
                 f'<span class="estado" style="background:{estado_color}1f;color:{estado_color};">{estado}</span>'
-                f'</div>'
+                f"</div>"
                 f'<div class="tipo">{tipo} · {moneda}</div>'
                 f'<div class="saldo"><span class="value">{saldo:,.2f}</span>'
                 f'<span class="moneda">{moneda}</span></div>'
-                f'</div>'
+                f"</div>"
             )
         cards_html = "".join(cards_list)
     else:
@@ -742,10 +742,7 @@ def _render_auditoria_html(rows: list[dict]) -> str:
     total = len(rows)
     bloqueos = sum(1 for r in rows if (r.get("status_code") or 0) == 403)
     exitosas = [r for r in rows if (r.get("status_code") or 0) == 200]
-    avg_latencia = (
-        sum((r.get("latencia_ms") or 0) for r in exitosas) / len(exitosas)
-        if exitosas else 0
-    )
+    avg_latencia = sum((r.get("latencia_ms") or 0) for r in exitosas) / len(exitosas) if exitosas else 0
 
     if rows:
         rows_html = []
